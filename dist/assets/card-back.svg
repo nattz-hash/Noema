@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 375" fill="none">
+ <defs>
+  <linearGradient id="base" x1="8" y1="2" x2="208" y2="366" gradientUnits="userSpaceOnUse"><stop stop-color="#392251"/><stop offset=".54" stop-color="#694C89"/><stop offset="1" stop-color="#332046"/></linearGradient>
+  <radialGradient id="light"><stop stop-color="#AD83C5" stop-opacity=".64"/><stop offset="1" stop-color="#AD83C5" stop-opacity="0"/></radialGradient>
+  <g id="corner">
+    <path d="M17 58V20h38M22 47V26h21M17 34c19 0 31-10 31-17M18 54c28 0 47-17 47-35"/>
+    <path d="m32 34 3 5 6 2-6 2-3 5-2-5-6-2 6-2 2-5Z" fill="#e8d8f2" stroke="none"/>
+  </g>
+  <path id="spark" d="M0-14C.6-6.2 6.2-.6 14 0 6.2.6.6 6.2 0 14-.6 6.2-6.2.6-14 0-6.2-.6-.6-6.2 0-14Z"/>
+ </defs>
+ <rect x="1" y="1" width="218" height="373" rx="13" fill="url(#base)" stroke="#745990" stroke-width="2"/>
+ <rect x="8" y="8" width="204" height="359" rx="9" fill="url(#light)" stroke="#BEA2D1" stroke-opacity=".65"/>
+ <g stroke="#E1CBEA" stroke-width="1" opacity=".79">
+  <use href="#corner"/><use href="#corner" transform="translate(220 0) scale(-1 1)"/>
+  <use href="#corner" transform="translate(0 375) scale(1 -1)"/><use href="#corner" transform="translate(220 375) scale(-1)"/>
+  <path d="M17 68v239m186-239v239M69 20h82M69 355h82" opacity=".53"/>
+  <ellipse cx="110" cy="187.5" rx="68" ry="113"/><ellipse cx="110" cy="187.5" rx="56" ry="94" opacity=".49"/>
+  <path d="M110 55c7 61 27 94 78 132.5-51 38.5-71 71.5-78 132.5-7-61-27-94-78-132.5C83 149 103 116 110 55Z"/>
+  <circle cx="110" cy="187.5" r="33"/><circle cx="110" cy="187.5" r="48" opacity=".55"/>
+  <path d="M67 187.5c25-33 61-33 86 0-25 33-61 33-86 0Z"/>
+  <circle cx="110" cy="187.5" r="14"/>
+  <path d="M110 100v27m0 120v28M68 121l11 17m62 99 11 17m0-133-11 17m-62 99-11 17" opacity=".62"/>
+  <use href="#spark" transform="translate(110 68) scale(.75)"/><use href="#spark" transform="translate(110 307) scale(.75)"/>
+ </g>
+ <g fill="#F5E3F8">
+  <use href="#spark" transform="translate(110 187.5) scale(.57)"/>
+  <use href="#spark" transform="translate(53 92) scale(.3)"/><use href="#spark" transform="translate(167 92) scale(.3)"/>
+  <use href="#spark" transform="translate(53 283) scale(.3)"/><use href="#spark" transform="translate(167 283) scale(.3)"/>
+  <circle cx="35" cy="145" r="1.5"/><circle cx="185" cy="145" r="1.5"/><circle cx="35" cy="230" r="1.5"/><circle cx="185" cy="230" r="1.5"/>
+ </g>
+</svg>
