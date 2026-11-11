@@ -14,6 +14,31 @@ const positions = [
   { name: 'Future', label: 'Framtid', prompt: 'En möjlig riktning utifrån nuläget.' },
 ];
 
+const spreadTypes = {
+  trekort: { title: 'Trekortsläggning', description: 'Se hur bakgrunden formar nuläget och vilken riktning som kan öppna sig.', positions },
+  relation: { title: 'Tanke, känsla och handling', description: 'Undersök en relation ur tre perspektiv. Bestäm vems perspektiv du läser.', positions: [
+    { name: 'Tanke', label: 'Medvetet', prompt: 'Vad upptar tankarna kring relationen?' },
+    { name: 'Känsla', label: 'Emotionellt', prompt: 'Vilken känsla behöver uppmärksamhet?' },
+    { name: 'Handling', label: 'Utåt', prompt: 'Hur kan perspektivet komma till uttryck i handling?' },
+  ] },
+  beslut: { title: 'Inför ett beslut', description: 'Undersök två alternativ och vad som behöver vägas in.', positions: [
+    { name: 'Alternativ A', label: 'Första valet', prompt: 'Vad präglar det första alternativet?' },
+    { name: 'Alternativ B', label: 'Andra valet', prompt: 'Vad präglar det andra alternativet?' },
+    { name: 'Att beakta', label: 'Vägledning', prompt: 'Vad behöver du ta hänsyn till?' },
+  ] },
+  grans: { title: 'Behov och gränser', description: 'Utforska vad du behöver och hur du kan uttrycka det.', positions: [
+    { name: 'Behov', label: 'Det viktiga', prompt: 'Vad behöver du i situationen?' },
+    { name: 'Gräns', label: 'Det som skyddar', prompt: 'Vilken gräns behöver uppmärksamhet?' },
+    { name: 'Uttryck', label: 'Nästa steg', prompt: 'Hur kan du uttrycka behovet?' },
+  ] },
+  arbete: { title: 'Arbete och energi', description: 'Undersök arbetsbelastning och vad som ger bättre förutsättningar.', positions: [
+    { name: 'Fokus', label: 'Uppgiften', prompt: 'Vad behöver din uppmärksamhet?' },
+    { name: 'Resurs', label: 'Stöd', prompt: 'Vilken resurs kan du använda?' },
+    { name: 'Justering', label: 'Vardagen', prompt: 'Vad kan du ändra för att orka?' },
+  ] },
+};
+let activeSpread = 'trekort';
+
 const paths = {
   home: '<path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 21v-7h6v7"/>',
   book: '<path d="M12 6c-3.6-2.8-6.8-3-10-1v14c3.2-2 6.4-1.8 10 1 3.6-2.8 6.8-3 10-1V5c-3.2-2-6.4-1.8-10 1zm0 0v14"/>',
@@ -141,7 +166,7 @@ function updateLibrary() {
     : `<div class="empty-state surface">${icon('search')}<h2>Inga kort hittades</h2><p>Prova ett annat ord eller visa hela leken.</p><button type="button" class="button secondary" data-action="clear-filters">Visa alla kort</button></div>`;
 }
 
-const parentRoutes = { hem: 'Startsida', bibliotek: 'Kortbibliotek', dagens: 'Dagens kort', trekort: 'Trekortsläggning' };
+const parentRoutes = { hem: 'Startsida', bibliotek: 'Kortbibliotek', dagens: 'Dagens kort', ...Object.fromEntries(Object.entries(spreadTypes).map(([id, type]) => [id, type.title])) };
 function detail(card, from, reversed) {
   const suit = suits[card.suit];
   return `<a class="back-link" href="#${from}">${icon('back')} ${parentRoutes[from]}</a>
@@ -254,8 +279,13 @@ function spreads() {
     ${shortcut({href: '#dagens', glyph: 'sun', title: 'Dagens kort', description: dailyReading() ? 'Visa dagens dragning' : 'Ett kort för dagens reflektion', variant: 'lilac'})}
     ${shortcut({href: '#trekort', glyph: 'layers', title: 'Trekortsläggning', description: 'Past · Present · Future', variant: 'sage'})}
   </div>
-  ${saved ? `<section class="home-section"><div class="section-heading"><h2>Senaste trekortsläggningen</h2></div>
-    <a class="saved-spread surface" href="#trekort?senaste=1">
+  <section class="home-section"><div class="section-heading"><h2>Utforska fler läggningar</h2></div>
+    <div class="shortcuts">
+      ${Object.entries(spreadTypes).filter(([id]) => id !== 'trekort').map(([id, type]) => shortcut({ href: `#${id}`, glyph: 'layers', title: type.title, description: type.positions.map((position) => position.name).join(' · '), variant: 'sage' })).join('')}
+    </div>
+  </section>
+  ${saved ? `<section class="home-section"><div class="section-heading"><h2>Senaste läggningen</h2></div>
+    <a class="saved-spread surface" href="#${Object.prototype.hasOwnProperty.call(spreadTypes, saved.kind) ? saved.kind : 'trekort'}?senaste=1">
       <span><strong>${saved.cards.map(({ id }) => cardsById.get(id).name).join(' · ')}</strong>
       <span class="shortcut-description">${shortDate.format(saved.date)}</span></span>${icon('arrow')}
     </a></section>` : ''}`;
@@ -277,7 +307,7 @@ function summary() {
   };
   return `<section class="spread-summary surface" aria-labelledby="summary-heading">
     <h2 id="summary-heading" tabindex="-1">Läs korten tillsammans</h2>
-    <p>Jämför hur temat <strong>${pastKey}</strong> i Past kan ha format <strong>${nowKey}</strong> i Present. Vad i nuläget ger <strong>${nextKey}</strong> utrymme i Future?</p>
+    <p>Jämför <strong>${pastKey}</strong> i ${spreadTypes[activeSpread].positions[0].name} med <strong>${nowKey}</strong> i ${spreadTypes[activeSpread].positions[1].name}. Hur förhåller sig <strong>${nextKey}</strong> i ${spreadTypes[activeSpread].positions[2].name} till de andra två korten?</p>
     ${repeatedSuit ? `<p>${repeatedTheme[repeatedSuit]}</p>` : ''}
   </section>`;
 }
@@ -286,10 +316,10 @@ function spread(animate = new Set()) {
   const hasCards = spreadCards.length === 3;
   const completed = revealed.size === 3;
   return `<a class="back-link" href="#laggningar">${icon('back')} Läggningar</a>
-  <section class="view-heading"><h1>Trekortsläggning</h1><p>Se hur bakgrunden formar nuläget och vilken riktning som kan öppna sig.</p></section>
+  <section class="view-heading"><h1>${spreadTypes[activeSpread].title}</h1><p>${spreadTypes[activeSpread].description}</p></section>
   <section class="spread-stage surface" aria-label="Trekortsläggningens positioner">
     <div class="position-grid">
-      ${positions.map(({ name, label, prompt }, index) => {
+      ${spreadTypes[activeSpread].positions.map(({ name, label, prompt }, index) => {
         const item = revealed.has(index) ? spreadCards[index] : null;
         const card = item ? cardsById.get(item.id) : null;
         return `<div class="position">
@@ -308,7 +338,7 @@ function spread(animate = new Set()) {
         : `<button type="button" class="button primary" data-action="start-spread">${icon('layers')} Dra tre kort</button>`}
     </div>
   </section>
-  ${revealed.size ? `<div class="position-readings">${positions.map(({ name, prompt }, index) => {
+  ${revealed.size ? `<div class="position-readings">${spreadTypes[activeSpread].positions.map(({ name, prompt }, index) => {
     if (!revealed.has(index)) return '';
     const item = spreadCards[index];
     const card = cardsById.get(item.id);
@@ -316,7 +346,7 @@ function spread(animate = new Set()) {
       <div class="draw-meta"><span class="position-label">${name}</span>${orientation(item)}</div>
       <h2>${card.name}</h2><p class="position-context">${prompt}</p>
       <p>${item.reversed ? card.reversed : card.upright}</p>
-      <a class="text-link" href="${cardLink(card, 'trekort', item.reversed)}">Kortbetydelse ${icon('arrow')}</a>
+      <a class="text-link" href="${cardLink(card, activeSpread, item.reversed)}">Kortbetydelse ${icon('arrow')}</a>
     </article>`;
   }).join('')}</div>` : ''}
   ${completed ? summary() : ''}`;
@@ -330,7 +360,7 @@ function getRoute() {
 
 function updateNav(page, from) {
   const current = page === 'kort' ? (from === 'bibliotek' ? 'bibliotek' : from === 'hem' ? 'hem' : 'laggningar')
-    : ['dagens', 'trekort'].includes(page) ? 'laggningar' : page;
+    : (page === 'dagens' || Object.prototype.hasOwnProperty.call(spreadTypes, page)) ? 'laggningar' : page;
   const items = [
     { id: 'hem', glyph: 'home', label: 'Start' },
     { id: 'bibliotek', glyph: 'book', label: 'Kortbibliotek' },
@@ -372,15 +402,24 @@ function render({ focus = false } = {}) {
       title = 'Dagens kort';
       main.innerHTML = daily();
       break;
+    case 'relation':
+    case 'beslut':
+    case 'grans':
+    case 'arbete':
     case 'trekort': {
-      title = 'Trekortsläggning';
+      if (activeSpread !== page) {
+        activeSpread = page;
+        spreadCards = [];
+        revealed = new Set();
+      }
+      title = spreadTypes[page].title;
       if (params.get('senaste') === '1') {
         const saved = lastSpread();
         if (saved) {
           spreadCards = saved.cards;
           revealed = new Set([0, 1, 2]);
         }
-        history.replaceState(null, '', '#trekort');
+        history.replaceState(null, '', `#${page}`);
       }
       main.innerHTML = spread();
       break;
@@ -401,7 +440,7 @@ function render({ focus = false } = {}) {
 function reveal(indices) {
   const newlyRevealed = new Set(indices.filter((index) => !revealed.has(index)));
   for (const index of newlyRevealed) revealed.add(index);
-  if (revealed.size === 3) saveReading('spread', { date: Date.now(), cards: spreadCards });
+  if (revealed.size === 3) saveReading('spread', { date: Date.now(), kind: activeSpread, cards: spreadCards });
   main.innerHTML = spread(newlyRevealed);
   if (revealed.size === 3) focusElement('[data-action="start-spread"]');
   else focusElement('[data-action="flip-position"]');
